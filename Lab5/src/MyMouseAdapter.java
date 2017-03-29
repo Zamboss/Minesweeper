@@ -3,12 +3,17 @@ import java.awt.Component;
 import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Random;
+
+import javax.swing.JOptionPane;
 
 import javax.swing.JFrame;
 
 public class MyMouseAdapter extends MouseAdapter {
-	private Random generator = new Random();
+	
+	
+	int counter = 11;
+	public static MinesPos mines = new MinesPos(10);
+
 	public void mousePressed(MouseEvent e) {
 		switch (e.getButton()) {
 		case 1:		//Left mouse button
@@ -34,8 +39,14 @@ public class MyMouseAdapter extends MouseAdapter {
 			myPanel.repaint();
 			break;
 			
-			//TODO: WORK IT
-		case 2:
+			
+		
+			
+			
+			
+			
+		case 3:	
+			
 			Component d = e.getComponent();
 			while (!(d instanceof JFrame)) {
 				d = d.getParent();
@@ -56,17 +67,9 @@ public class MyMouseAdapter extends MouseAdapter {
 			myPanel1.mouseDownGridX = myPanel1.getGridX(r, t);
 			myPanel1.mouseDownGridY = myPanel1.getGridY(r, t);
 			myPanel1.repaint();
-			break;
 			
 			
-			
-		case 3:	
-			
-			
-			
-			//Right mouse button
-			//Do nothing
-			//TODO: flags by right click
+		
 			break;
 		default:    //Some other button (2 = Middle mouse button, etc.)
 			//Do nothing
@@ -95,49 +98,61 @@ public class MyMouseAdapter extends MouseAdapter {
 			myPanel.y = y;
 			int gridX = myPanel.getGridX(x, y);
 			int gridY = myPanel.getGridY(x, y);
-			if ((myPanel.mouseDownGridX == -1) || (myPanel.mouseDownGridY == -1)) {
-				//Had pressed outside
-				//Do nothing
-			} else {
-				if ((gridX == -1) || (gridY == -1)) {
-					//Is releasing outside
-					//Do nothing
-				} else {
-					if ((myPanel.mouseDownGridX != gridX) || (myPanel.mouseDownGridY != gridY)) {
-						//Released the mouse button on a different cell where it was pressed
-						//Do nothing
-					} else {
-						//Released the mouse button on the same cell where it was pressed
-						if ((gridX == -1) || (gridY == -1)) {
-							//On the left column and on the top row... do nothing
-						 }else {
-							//On the grid other than on the left column and on the top row:
-							Color newColor = null;
-							//TODO: find how to return the value of Color
-							
-							switch (generator.nextInt(1)) {
-							case 0:
-								newColor = Color.GRAY;
-								break;
-							
-						
-								
-							}
-							myPanel.colorArray[myPanel.mouseDownGridX][myPanel.mouseDownGridY] = newColor;
-							myPanel.repaint();
-						}
-					}
-				}
-			}
-			myPanel.repaint();
-			break;
-		case 2: 
+			if(gridX >= 0 && gridX <= 8 && gridY >= 0 && gridY <= 8)
+			 {
+				if(mines.nearbyMines(gridX, gridY))
+				 {
+					
+					int counter = mines.nearbyMinesCounter(gridX, gridY);
+
+					Color newColor = Color.GRAY;
+					MyPanel.colorArray[gridX][gridY] = newColor;
+					myPanel.nearbyMines[gridX][gridY] = counter;
+					myPanel.counter++;
+					myPanel.repaint();
+				} 
+
+				
+				
+				else if(!mines.coordinateCompare(gridX, gridY))
+				 {
+					 myPanel.nextToBlockDisplay(gridX, gridY);
+
+				 }
+				
 			
+
+				if(mines.coordinateCompare(gridX, gridY))
+				 {
+					Color newColor = Color.BLACK;
+					MyPanel.colorArray[gridX][gridY] = newColor;
+					myPanel.repaint();
+					///
+					JOptionPane.showMessageDialog(myFrame,
+							"You stepped on a mine, You lose!",
+							"You lose!",
+							JOptionPane.ERROR_MESSAGE);
+					myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+					System.exit(0);
+
+				}
+				if (myPanel.counter >=53) 
+				 {
+					 JOptionPane.showMessageDialog(null, "You won. Big Deal.");
+					 System.exit(0);
+				 }
+
+			}
+			
+break;
+		
+		case 3:		
 			Component d = e.getComponent();
 			while (!(d instanceof JFrame)) {
 				d = d.getParent();
 				if (d == null) {
 					return;
+				}
 				}
 			JFrame myFrame1 = (JFrame)d;
 			MyPanel myPanel1 = (MyPanel) myFrame1.getContentPane().getComponent(0);  //Can also loop among components to find MyPanel
@@ -151,50 +166,74 @@ public class MyMouseAdapter extends MouseAdapter {
 			myPanel1.y = t;
 			int gridX1 = myPanel1.getGridX(r, t);
 			int gridY1 = myPanel1.getGridY(r, t);
-			if ((myPanel1.mouseDownGridX == -1) || (myPanel1.mouseDownGridY == -1)) {
-				//Had pressed outside
+		myPanel1.repaint();
+		
+				if(gridX1 >= 0 && gridX1 <= 8 && gridY1 >= 0 && gridY1 <= 8) 
+				 {
+					
+
+					if(MyPanel.colorArray[gridX1][gridY1].equals(Color.WHITE))
+					 {
+						if(counter>0)
+						 {
+							 MyPanel.colorArray[gridX1][gridY1] = Color.RED;
+							 myPanel1.repaint();
+							 counter--;
+						 }
+						
+						else if(counter == 0)
+						 {
+							//Limits the amount of flags.
+							JOptionPane.showMessageDialog(d, "Maximum amount of flags used.");
+						 }
+					 }
+
+						else if(MyPanel.colorArray[gridX1][gridY1].equals(Color.BLACK) || MyPanel.colorArray[gridX1][gridY1].equals(Color.GRAY))
+					     {
+						// Do nothing.
+					     }
+
+				    else 
+					 {
+						MyPanel.colorArray[gridX1][gridY1] = Color.WHITE;
+						myPanel1.repaint();
+						
+					    if(counter<10)
+					     {	
+						    counter++;	
+						 }
+					  
+					    else 
+					     {
+
+					    	MyPanel.colorArray[gridX1][gridY1] = Color.WHITE;
+					    	myPanel1.repaint();
+					     }
+					 }
+				 }
+
+				break;
+				default:    //Some other button (2 = Middle mouse button, etc.)
 				//Do nothing
-			} else {
-				if ((gridX1 == -1) || (gridY1 == -1)) {
-					//Is releasing outside
-					//Do nothing
-				} else {
-					if ((myPanel1.mouseDownGridX != gridX1) || (myPanel1.mouseDownGridY != gridY1)) {
-						//Released the mouse button on a different cell where it was pressed
-						//Do nothing
-					} else {
-						//Released the mouse button on the same cell where it was pressed
-						if ((gridX1 == -1) || (gridY1 == -1)) {
-							//On the left column and on the top row... do nothing
-						 }else {
-							//On the grid other than on the left column and on the top row:
-							Color newColor = null;
-							//TODO: find how to return the value of Color
+				break;
+				 
+			}
+		 }
+
+
+
+		public void Mines()
+		 {
+			 mines.setCoordinate();
+		 }
+	
 							
-							switch (generator.nextInt(1)) {
-							case 0:
-								newColor = Color.RED;
-								break;
 							
 						
 								
-							}
-							myPanel1.colorArray[myPanel1.mouseDownGridX][myPanel1.mouseDownGridY] = newColor;
-							myPanel1.repaint();
-						}
-					}
-				}
-			}
-			myPanel1.repaint();
-			break;
-			}
-		case 3:		//Right mouse button
-			//Do nothing
-			break;
-		//default:    //Some other button (2 = Middle mouse button, etc.)
-			//Do nothing
-		//	break;
+		
 		}
-	}
 	
-}
+
+
+	

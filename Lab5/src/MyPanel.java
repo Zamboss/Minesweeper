@@ -16,7 +16,13 @@ public class MyPanel extends JPanel {
 	public int y = -1;
 	public int mouseDownGridX = 0;
 	public int mouseDownGridY = 0;
-	public Color[][] colorArray = new Color[TOTAL_COLUMNS][TOTAL_ROWS];
+	public static Color[][] colorArray = new Color[TOTAL_COLUMNS][TOTAL_ROWS];
+	public static MinesPos mines;
+	public int counter=0;
+	public int nearbyMines[][] = new int[TOTAL_COLUMNS][TOTAL_ROWS];
+	
+	
+	
 	public MyPanel() {   //This is the constructor... this code runs first to initialize
 		if (INNER_CELL_SIZE + (new Random()).nextInt(1) < 1) {	//Use of "random" to prevent unwanted Eclipse warning
 			throw new RuntimeException("INNER_CELL_SIZE must be positive!");
@@ -36,6 +42,13 @@ public class MyPanel extends JPanel {
 		for (int x = 1; x < TOTAL_COLUMNS; x++) {   //The rest of the grid
 			for (int y = 1; y < TOTAL_ROWS; y++) {
 				colorArray[x][y] = Color.WHITE;
+			}
+		}
+		for (int x = 0; x < TOTAL_COLUMNS; x++) {   // Paint the grid
+			for (int y = 0; y < TOTAL_ROWS; y++) {
+				
+				
+
 			}
 		}
 	}
@@ -78,7 +91,42 @@ public class MyPanel extends JPanel {
 				}
 			}
 		}
+		
+			for (int x = 0; x < TOTAL_COLUMNS; x++) 
+			 {
+				for (int y = 0; y < TOTAL_ROWS; y++) 
+				 {
+					if ( (nearbyMines[x][y] != 0) && colorArray[x][y] != Color.BLACK) 
+					 {
+						int number = nearbyMines[x][y];
+						
+						if (number == 1)
+						 {
+							g.setColor(Color.GREEN);
+						 }
+						
+						else if (number == 2)
+						  {
+							g.setColor(Color.BLUE);
+							
+						}
+						else if (number == 3)
+						{
+							g.setColor(Color.RED);
+						}
+						
+						else g.setColor(Color.ORANGE);
+						
+						g.drawString(String.valueOf(number), x1 + GRID_X + (x * (INNER_CELL_SIZE + 1)) + 18, y1 + GRID_Y + (y * (INNER_CELL_SIZE + 1)) + 25);					 }
+				 }
+			 }
 	}
+	
+	
+	
+	
+	
+	
 	public int getGridX(int x, int y) {
 		Insets myInsets = getInsets();
 		int x1 = myInsets.left;
@@ -104,6 +152,8 @@ public class MyPanel extends JPanel {
 		}
 		return x;
 	}
+	
+	
 	public int getGridY(int x, int y) {
 		Insets myInsets = getInsets();
 		int x1 = myInsets.left;
@@ -129,4 +179,45 @@ public class MyPanel extends JPanel {
 		}
 		return y;
 	}
+	
+	
+	public void nextToBlockDisplay(int x, int y)
+	 {
+		if((x<0)||(y<0) || (x>=9)||(y>=9))
+		 {
+			return;
+		 }
+		
+		if(MyMouseAdapter.mines.coordinateCompare(x,y))
+		 {
+			return;
+		 }
+			
+	    if(MyMouseAdapter.mines.nearbyMines(x, y))
+	     {  		 
+        	int counter = MyMouseAdapter.mines.nearbyMinesCounter(x, y);
+        	colorArray[x][y] = Color.GRAY;
+     		nearbyMines[x][y] = counter;
+      		counter++;
+           repaint();
+           return;
+		 }
+			
+	    else 
+	     {		
+			if(colorArray[x][y] == Color.GRAY)
+			{
+				return;
+			}
+			
+			colorArray[x][y] = Color.GRAY;
+			nextToBlockDisplay(x-1, y);
+			nextToBlockDisplay(x+1, y);
+			nextToBlockDisplay(x, y-1);
+			nextToBlockDisplay(x, y+1);
+			counter++;
+}
+	
+	 
+}
 }
